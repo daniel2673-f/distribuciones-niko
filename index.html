@@ -322,19 +322,13 @@
         <div id="m-stock" class="flex items-center gap-1.5 text-xs font-bold text-emerald-600">
           <i class="fa-solid fa-circle-check"></i> Disponible
         </div>
-        <!-- Ambos precios visibles -->
-        <div class="border-t pt-3 space-y-2">
+        <!-- Precio único según el modo elegido -->
+        <div class="border-t pt-3 space-y-1">
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-500">Precio Detal:</span>
-            <span id="m-price-detal" class="text-sm font-bold text-slate-700">$0</span>
+            <span id="m-price-label" class="text-xs text-slate-500">Precio Mayorista:</span>
+            <span id="m-price-value" class="text-lg font-black text-niko-red">$0</span>
           </div>
-          <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-500">Precio Mayorista:</span>
-            <span id="m-price-mayorista" class="text-lg font-black text-niko-red">$0</span>
-          </div>
-          <div id="m-price-mode-info" class="text-[11px] text-slate-400 text-right">
-            (Se aplicará el precio según el modo seleccionado)
-          </div>
+          <div id="m-price-mode-info" class="text-[11px] text-slate-400 text-right"></div>
         </div>
       </div>
       <div class="p-3 bg-slate-50 border-t">
@@ -342,6 +336,33 @@
           <i class="fa-solid fa-cart-plus"></i> Agregar al pedido
         </button>
       </div>
+    </div>
+  </div>
+  <!-- ================= MODO DE COMPRA (al entrar) ================= -->
+  <div id="modal-mode" class="fixed inset-0 z-[70] bg-black/85 flex justify-center items-center p-6 hidden opacity-0 transition-opacity" role="dialog" aria-modal="true" aria-label="Elige tu modo de compra" aria-hidden="true">
+    <div class="bg-white w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl relative text-center">
+      <div class="bg-niko-red text-white w-14 h-14 rounded-2xl flex items-center justify-center mx-auto shadow">
+        <i class="fa-solid fa-basket-shopping text-xl"></i>
+      </div>
+      <div>
+        <h3 class="font-black text-base">¿CÓMO QUIERES COMPRAR?</h3>
+        <p class="text-xs text-slate-500 mt-1">Elige el tipo de precios que quieres ver</p>
+      </div>
+      <button onclick="pickPriceMode('detal')" class="w-full bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-niko-red rounded-xl p-3.5 flex items-center gap-3 text-left transition">
+        <span class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-cart-arrow-down text-niko-red"></i></span>
+        <span>
+          <span class="block font-black text-sm">AL DETAL</span>
+          <span class="block text-[11px] text-slate-500">Compras pequeñas · precios unitarios</span>
+        </span>
+      </button>
+      <button onclick="pickPriceMode('mayorista')" class="w-full bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 hover:border-niko-red rounded-xl p-3.5 flex items-center gap-3 text-left transition">
+        <span class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-boxes-stacked text-niko-red"></i></span>
+        <span>
+          <span class="block font-black text-sm">AL POR MAYOR</span>
+          <span class="block text-[11px] text-slate-500">Cantidades de docena o más · menor precio</span>
+        </span>
+      </button>
+      <button onclick="pickPriceMode('sin_precios')" class="text-xs text-slate-400 hover:text-niko-red underline">Ver catálogo sin precios</button>
     </div>
   </div>
   <!-- ================= PDF MODAL ================= -->
@@ -551,27 +572,43 @@
     const SUPABASE_ANON_KEY = "sb_publishable_aHnLvSOtNu_A-CZN2qrA6w_YwUkcGZD";
     // ========== DATA ==========
     const DEFAULT_PRODUCTS = [
-      { id: "p1", ref: "MD001", name: "Media deportiva Nike Algodón", category: "Medias", subcategory: "Deportivas", priceDetal: 25000, priceMayorista: 18000, saleType: "both", stock: 120, sizes: "Única", colors: "Blanco,Negro,Gris", features: "Suave y cómoda,Ideal para uso diario,Excelente ajuste,Material resistente", brand: "NIKO", image: "https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?w=500&auto=format&fit=crop&q=60", active: true },
-      { id: "p2", ref: "MD002", name: "Media baleta dama encaje", category: "Medias", subcategory: "Casuales", priceDetal: 15000, priceMayorista: 9500, saleType: "dozen", stock: 80, sizes: "Única", colors: "Rosa,Beige,Negro", features: "Suave,Elástica,Diseño delicado", brand: "NIKO", image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=500&auto=format&fit=crop&q=60", active: true },
-      { id: "p3", ref: "MD003", name: "Media escolar blanca", category: "Medias", subcategory: "Escolares", priceDetal: 12000, priceMayorista: 8000, saleType: "dozen", stock: 200, sizes: "Única", colors: "Blanco", features: "Resistente,Fácil de lavar,Uniforme escolar", brand: "NIKO", image: "https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?w=500&auto=format&fit=crop&q=60", active: true },
-      { id: "p4", ref: "BX001", name: "Boxer Algodón Hombre Soft", category: "Ropa Interior", subcategory: "Hombre", priceDetal: 22000, priceMayorista: 14000, saleType: "unit", stock: 90, sizes: "S,M,L,XL", colors: "Negro,Azul,Gris", features: "Algodón suave,Elástico cómodo,Transpirable", brand: "NIKO", image: "https://images.unsplash.com/photo-1583846783214-7229a91b20ed?w=500&auto=format&fit=crop&q=60", active: true },
-      { id: "p5", ref: "PJ001", name: "Pijama Satín Dama Elegante", category: "Pijamas", subcategory: "Dama", priceDetal: 85000, priceMayorista: 52000, saleType: "unit", stock: 35, sizes: "S,M,L", colors: "Rosa,Negro,Vino", features: "Satín premium,Cómoda,Elegante", brand: "NIKO", image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&auto=format&fit=crop&q=60", active: true },
-      { id: "p6", ref: "HG001", name: "Juego de Sábanas Microfibra", category: "Hogar", subcategory: "Sábanas", priceDetal: 120000, priceMayorista: 78000, saleType: "unit", stock: 25, sizes: "Sencillo,Doble,Queen", colors: "Blanco,Beige,Gris", features: "Microfibra suave,Fácil planchado,Duradera", brand: "NIKO", image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=500&auto=format&fit=crop&q=60", active: true },
-      { id: "p7", ref: "AC001", name: "Gorra Urbana Snapback", category: "Accesorios", subcategory: "Gorras", priceDetal: 35000, priceMayorista: 18000, saleType: "dozen", stock: 60, sizes: "Única", colors: "Negro,Azul,Rojo", features: "Ajustable,Estilo urbano,Cómoda", brand: "NIKO", image: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=500&auto=format&fit=crop&q=60", active: true },
-      { id: "p8", ref: "DP001", name: "Camiseta Deportiva Dry-Fit", category: "Deporte", subcategory: "Camisetas", priceDetal: 45000, priceMayorista: 28000, saleType: "both", stock: 70, sizes: "S,M,L,XL", colors: "Negro,Blanco,Azul,Rojo", features: "Dry-Fit,Transpirable,Ligera", brand: "NIKO", image: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=500&auto=format&fit=crop&q=60", active: true }
+      { id: "p1", ref: "MD001", name: "Media deportiva dama algodón", category: "Medias", subcategory: "Medias de dama", priceDetal: 25000, priceMayorista: 18000, saleType: "both", stock: 120, sizes: "Única", colors: "Blanco,Negro,Gris", features: "Suave y cómoda,Ideal para uso diario,Excelente ajuste,Material resistente", brand: "NIKO", image: "https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?w=500&auto=format&fit=crop&q=60", active: true },
+      { id: "p2", ref: "MD002", name: "Media baleta dama encaje", category: "Medias", subcategory: "Medias de dama", priceDetal: 15000, priceMayorista: 9500, saleType: "dozen", stock: 80, sizes: "Única", colors: "Rosa,Beige,Negro", features: "Suave,Elástica,Diseño delicado", brand: "NIKO", image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=500&auto=format&fit=crop&q=60", active: true },
+      { id: "p3", ref: "MD003", name: "Media tobillera hombre algodón", category: "Medias", subcategory: "Medias de hombre", priceDetal: 18000, priceMayorista: 12000, saleType: "dozen", stock: 100, sizes: "Única", colors: "Blanco,Negro,Azul", features: "Suave,Resistente,Transpirable", brand: "NIKO", image: "https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?w=500&auto=format&fit=crop&q=60", active: true },
+      { id: "p4", ref: "MD004", name: "Media escolar niño blanca", category: "Medias", subcategory: "Medias de niño", priceDetal: 12000, priceMayorista: 8000, saleType: "dozen", stock: 200, sizes: "Única", colors: "Blanco", features: "Resistente,Fácil de lavar,Uniforme escolar", brand: "NIKO", image: "https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?w=500&auto=format&fit=crop&q=60", active: true },
+      { id: "p5", ref: "MD005", name: "Media canillera fútbol profesional", category: "Medias", subcategory: "Medias de fútbol", priceDetal: 22000, priceMayorista: 15000, saleType: "dozen", stock: 90, sizes: "Única", colors: "Blanco,Negro,Rojo", features: "Refuerzo en talón,Algodón premium,Alta duración", brand: "NIKO", image: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=500&auto=format&fit=crop&q=60", active: true },
+      { id: "p6", ref: "BX001", name: "Boxer Algodón Hombre Soft", category: "Ropa Interior", subcategory: "Hombre", priceDetal: 22000, priceMayorista: 14000, saleType: "unit", stock: 90, sizes: "S,M,L,XL", colors: "Negro,Azul,Gris", features: "Algodón suave,Elástico cómodo,Transpirable", brand: "NIKO", image: "https://images.unsplash.com/photo-1583846783214-7229a91b20ed?w=500&auto=format&fit=crop&q=60", active: true },
+      { id: "p7", ref: "BX002", name: "Boxer licra hombre deportivo", category: "Ropa Interior", subcategory: "Hombre", priceDetal: 25000, priceMayorista: 16000, saleType: "unit", stock: 70, sizes: "S,M,L,XL", colors: "Negro,Gris", features: "Licra,Deportivo,Moldea", brand: "NIKO", image: "https://images.unsplash.com/photo-1583846783214-7229a91b20ed?w=500&auto=format&fit=crop&q=60", active: true },
+      { id: "p8", ref: "BR001", name: "Bikini dama microfibra básica", category: "Ropa Interior", subcategory: "Dama", priceDetal: 18000, priceMayorista: 12000, saleType: "dozen", stock: 110, sizes: "S,M,L", colors: "Negro,Beige,Rosa", features: "Microfibra,Cómoda,Suave", brand: "NIKO", image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&auto=format&fit=crop&q=60", active: true },
+      { id: "p9", ref: "NI001", name: "Interior niño algodón liso", category: "Ropa Interior", subcategory: "Niños", priceDetal: 15000, priceMayorista: 10000, saleType: "dozen", stock: 80, sizes: "8,10,12,14", colors: "Blanco,Azul", features: "Algodón,Suave,Elástico", brand: "NIKO", image: "https://images.unsplash.com/photo-1591339806901-87e5f8866e33?w=500&auto=format&fit=crop&q=60", active: true },
+      { id: "p10", ref: "RG001", name: "Camiseta talla grande algodón", category: "Ropa Grande", subcategory: "Camisetas", priceDetal: 45000, priceMayorista: 30000, saleType: "unit", stock: 60, sizes: "XL,XXL,XXXL", colors: "Blanco,Negro,Gris", features: "Algodón,Amplia,Resistente", brand: "NIKO", image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&auto=format&fit=crop&q=60", active: true },
+      { id: "p11", ref: "CB001", name: "Cobija polar individual", category: "Cobijas", subcategory: "Individual", priceDetal: 55000, priceMayorista: 36000, saleType: "unit", stock: 40, sizes: "1.60 x 2.00", colors: "Rojo,Azul,Gris,Negro", features: "Polar suave,Abrigada,No pica", brand: "NIKO", image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=500&auto=format&fit=crop&q=60", active: true },
+      { id: "p12", ref: "PJ001", name: "Pijama Satín Dama Elegante", category: "Pijamas", subcategory: "Dama", priceDetal: 85000, priceMayorista: 52000, saleType: "unit", stock: 35, sizes: "S,M,L", colors: "Rosa,Negro,Vino", features: "Satín premium,Cómoda,Elegante", brand: "NIKO", image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&auto=format&fit=crop&q=60", active: true },
+      { id: "p13", ref: "PJ002", name: "Pijama algodón hombre franela", category: "Pijamas", subcategory: "Hombre", priceDetal: 78000, priceMayorista: 48000, saleType: "unit", stock: 30, sizes: "M,L,XL", colors: "Azul,Gris", features: "Algodón,Comoda,Abrigada", brand: "NIKO", image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&auto=format&fit=crop&q=60", active: true },
+      { id: "p14", ref: "HO001", name: "Camiseta básica hombre algodón", category: "Hombre", subcategory: "Camisetas", priceDetal: 28000, priceMayorista: 19000, saleType: "unit", stock: 100, sizes: "S,M,L,XL", colors: "Blanco,Negro,Gris,Azul", features: "Algodón,Básica,Ligera", brand: "NIKO", image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&auto=format&fit=crop&q=60", active: true },
+      { id: "p15", ref: "DA001", name: "Blusa dama estampada casual", category: "Dama", subcategory: "Blusas", priceDetal: 42000, priceMayorista: 28000, saleType: "unit", stock: 55, sizes: "S,M,L", colors: "Multicolor", features: "Floral,Cómoda,Verano", brand: "NIKO", image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&auto=format&fit=crop&q=60", active: true },
+      { id: "p16", ref: "HO002", name: "Pantalón jeans hombre tiro medio", category: "Hombre", subcategory: "Pantalones", priceDetal: 65000, priceMayorista: 42000, saleType: "unit", stock: 45, sizes: "30,32,34,36", colors: "Azul,Negro", features: "Jean,Duradero,Cómodo", brand: "NIKO", image: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=500&auto=format&fit=crop&q=60", active: true },
+      { id: "p17", ref: "DA002", name: "Legging dama deportivo push-up", category: "Dama", subcategory: "Leggings", priceDetal: 38000, priceMayorista: 25000, saleType: "unit", stock: 60, sizes: "S,M,L,XL", colors: "Negro,Gris,Azul", features: "Elástico,Cómodo,Algodón", brand: "NIKO", image: "https://images.unsplash.com/photo-1518310383802-640c2de311b2?w=500&auto=format&fit=crop&q=60", active: true }
     ];
     const CATEGORIES = [
-      { name: "Dama", image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=300&auto=format&fit=crop&q=60" },
       { name: "Hombre", image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&auto=format&fit=crop&q=60" },
-      { name: "Niño", image: "https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?w=300&auto=format&fit=crop&q=60" },
-      { name: "Niña", image: "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?w=300&auto=format&fit=crop&q=60" },
-      { name: "Medias", image: "https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?w=300&auto=format&fit=crop&q=60" },
+      { name: "Dama", image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=300&auto=format&fit=crop&q=60" },
       { name: "Ropa Interior", image: "https://images.unsplash.com/photo-1583846783214-7229a91b20ed?w=300&auto=format&fit=crop&q=60" },
-      { name: "Pijamas", image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=300&auto=format&fit=crop&q=60" },
-      { name: "Hogar", image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=300&auto=format&fit=crop&q=60" },
-      { name: "Deporte", image: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=300&auto=format&fit=crop&q=60" },
-      { name: "Accesorios", image: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=300&auto=format&fit=crop&q=60" }
+      { name: "Medias", image: "https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?w=300&auto=format&fit=crop&q=60" },
+      { name: "Ropa Grande", image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&auto=format&fit=crop&q=60" },
+      { name: "Cobijas", image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=300&auto=format&fit=crop&q=60" },
+      { name: "Pijamas", image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=300&auto=format&fit=crop&q=60" }
     ];
+    // Subcategorías fijas por categoría (según pedido del cliente)
+    const SUB_CATS = {
+      "Hombre": ["Todas", "Camisetas", "Pantalones", "Boxers", "Sacos", "Joggers"],
+      "Dama": ["Todas", "Blusas", "Pantalones", "Leggings", "Faldas", "Sacos"],
+      "Medias": ["Todas", "Medias de dama", "Medias de hombre", "Medias de niño", "Medias de fútbol"],
+      "Ropa Interior": ["Todas", "Hombre", "Dama", "Niños"],
+      "Ropa Grande": ["Todas", "Camisetas", "Blusas", "Pantalones"],
+      "Pijamas": ["Todas", "Dama", "Hombre"],
+      "Cobijas": ["Todas", "Individual", "Matrimonial", "Doble"]
+    };
     // ========== UTILS (seguridad y fallbacks) ==========
     const PLACEHOLDER = "data:image/svg+xml," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><rect width='100%' height='100%' fill='#f1f5f9'/><text x='50%' y='50%' font-family='Arial' font-size='22' fill='#94a3b8' text-anchor='middle' dominant-baseline='middle'>NIKO</text></svg>`);
     function esc(s) {
@@ -615,7 +652,11 @@
       loadData();
       renderHomeCats();
       updateCartBadge();
-      setPriceMode("mayorista");
+      const savedMode = localStorage.getItem("niko_price_mode");
+      if (savedMode && ["detal", "mayorista", "sin_precios"].includes(savedMode)) {
+        setPriceMode(savedMode);
+      }
+      setModal("modal-mode", true); // siempre pregunta al entrar
       const si = document.getElementById("social-instagram");
       const st = document.getElementById("social-tiktok");
       const sf = document.getElementById("social-facebook");
@@ -626,7 +667,20 @@
       if (sw) sw.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hola Distribuciones Niko, quisiera más información sobre el catálogo")}`;
       syncFromSupabase();
     };
+    function pickPriceMode(m) {
+      setPriceMode(m);
+      localStorage.setItem("niko_price_mode", m);
+      setModal("modal-mode", false);
+    }
     function loadData() {
+      if (window.__EMBEDDED_PRODUCTS__ && Array.isArray(window.__EMBEDDED_PRODUCTS__) && window.__EMBEDDED_PRODUCTS__.length) {
+        products = window.__EMBEDDED_PRODUCTS__.map(p => Object.assign({}, p));
+        const storedCartE = localStorage.getItem("niko_cart");
+        if (storedCartE) {
+          try { cart = JSON.parse(storedCartE); } catch { cart = []; }
+        }
+        return;
+      }
       const stored = localStorage.getItem("niko_products");
       if (stored) {
         try { products = JSON.parse(stored); }
@@ -825,8 +879,14 @@
       `).join("");
     }
     function renderSubcats() {
-      const catProds = products.filter(p => p.category === currentCategory && p.active !== false);
-      const subs = ["Todas", ...new Set(catProds.map(p => p.subcategory).filter(Boolean))];
+      const fixed = SUB_CATS[currentCategory];
+      let subs;
+      if (fixed) {
+        subs = fixed;
+      } else {
+        const catProds = products.filter(p => p.category === currentCategory && p.active !== false);
+        subs = ["Todas", ...new Set(catProds.map(p => p.subcategory).filter(Boolean))];
+      }
       document.getElementById("subcat-chips").innerHTML = subs.map(s => `
         <button onclick="setSubcat('${esc(s)}')" class="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap transition
           ${currentSubcat === s ? 'bg-niko-red text-white shadow' : 'bg-slate-200 text-slate-700'}">
@@ -860,16 +920,12 @@
       if (priceMode === "sin_precios") {
         priceHtml = `<div class="text-xs text-slate-400">Por cotizar</div>`;
       } else {
+        const label = priceMode === "detal" ? "Detal" : "Mayorista";
+        const val = priceMode === "detal" ? p.priceDetal : p.priceMayorista;
         priceHtml = `
-            <div class="space-y-0.5">
-              <div class="flex justify-between text-[11px]">
-                <span class="text-slate-500">Detal:</span>
-                <span class="font-bold text-slate-700">$${p.priceDetal.toLocaleString("es-CO")}</span>
-              </div>
-              <div class="flex justify-between text-[11px]">
-                <span class="text-slate-500">Mayorista:</span>
-                <span class="font-black text-niko-red">$${p.priceMayorista.toLocaleString("es-CO")}</span>
-              </div>
+            <div class="flex justify-between items-center text-[11px]">
+              <span class="text-slate-500">Precio ${label}:</span>
+              <span class="font-black text-niko-red">$${val.toLocaleString("es-CO")}</span>
             </div>
           `;
       }
@@ -939,9 +995,18 @@
         stockEl.className = "flex items-center gap-1.5 text-xs font-bold text-red-600";
         stockEl.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> Agotado`;
       }
-      // Both prices always visible
-      document.getElementById("m-price-detal").innerText = `$${p.priceDetal.toLocaleString("es-CO")}`;
-      document.getElementById("m-price-mayorista").innerText = `$${p.priceMayorista.toLocaleString("es-CO")}`;
+      // Precio único según modo
+      if (priceMode === "sin_precios") {
+        document.getElementById("m-price-label").innerText = "Precio:";
+        document.getElementById("m-price-value").innerText = "Por cotizar";
+        document.getElementById("m-price-mode-info").innerText = "Contacta por WhatsApp para precio";
+      } else {
+        const label = priceMode === "detal" ? "Precio Detal:" : "Precio Mayorista:";
+        const val = priceMode === "detal" ? p.priceDetal : p.priceMayorista;
+        document.getElementById("m-price-label").innerText = label;
+        document.getElementById("m-price-value").innerText = `$${val.toLocaleString("es-CO")}`;
+        document.getElementById("m-price-mode-info").innerText = priceMode === "detal" ? "Precio unitario al detal" : "Precio al por mayor (docena o más)";
+      }
       const mAddBtn = document.getElementById("m-add-btn");
       if (p.stock <= 0) {
         mAddBtn.disabled = true;
@@ -1427,10 +1492,9 @@
     }
     function shareCatalog() {
       if (navigator.share) {
-        navigator.share({ title: "DISTRIBUCIONES NIKO", text: "Mira nuestro catálogo", url: window.location.href });
+        navigator.share({ title: "DISTRIBUCIONES NIKO", text: "Mira el catálogo de DISTRIBUCIONES NIKO. Escríbenos por WhatsApp al 3208226272.", url: window.location.href }).catch(() => {});
       } else {
-        navigator.clipboard?.writeText(window.location.href);
-        showToast("Enlace copiado");
+        showToast("Compartir solo está disponible en el teléfono.");
       }
     }
     function openWhatsApp() {
