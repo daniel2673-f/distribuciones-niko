@@ -186,7 +186,7 @@
         </div>
         <!-- PDF + Share -->
         <div class="grid grid-cols-2 gap-2">
-          <button onclick="openPdfModal()" class="bg-niko-red hover:bg-red-700 text-white py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow">
+          <button onclick="downloadAutoCatalogPdf()" class="bg-niko-red hover:bg-red-700 text-white py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow">
             <i class="fa-solid fa-file-pdf"></i> Descargar PDF
           </button>
           <button onclick="shareCatalog()" class="bg-niko-red hover:bg-red-700 text-white py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow">
@@ -256,6 +256,7 @@
             <thead class="bg-slate-100 text-slate-600 font-bold uppercase">
               <tr>
                 <th class="p-2 text-left">Producto</th>
+                <th class="p-2">Imagen</th>
                 <th class="p-2">Ref</th>
                 <th class="p-2">Mayorista</th>
                 <th class="p-2">Acción</th>
@@ -458,15 +459,15 @@
         </div>
         <div>
           <h3 class="font-black text-sm">Acceso restringido</h3>
-          <p class="text-[11px] text-slate-500">Ingresa el PIN de administrador</p>
+          <p class="text-[11px] text-slate-500">Ingresa el código de acceso</p>
         </div>
       </div>
       <div>
-        <input type="password" id="admin-pin" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="PIN de acceso"
+        <input type="password" id="admin-pin" autocomplete="off" maxlength="30" placeholder="Código de acceso"
           oninput="document.getElementById('login-error').classList.add('hidden')"
           onkeydown="if(event.key==='Enter') attemptLogin()"
           class="w-full text-center text-lg tracking-[0.3em] p-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-niko-red">
-        <p id="login-error" class="hidden mt-1.5 text-red-600 text-[11px] font-bold">PIN incorrecto. Inténtalo de nuevo.</p>
+        <p id="login-error" class="hidden mt-1.5 text-red-600 text-[11px] font-bold">Código incorrecto. Inténtalo de nuevo.</p>
       </div>
       <button onclick="attemptLogin()" class="w-full bg-niko-red hover:bg-red-700 text-white font-black py-2.5 rounded-xl text-xs flex items-center justify-center gap-2">
         <i class="fa-solid fa-unlock"></i> Entrar al panel
@@ -486,6 +487,19 @@
         <div>
           <label for="pf-name" class="text-[11px] font-bold text-slate-500 uppercase">Nombre *</label>
           <input type="text" id="pf-name" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg mt-0.5">
+        </div>
+        <div>
+          <label class="text-[11px] font-bold text-slate-500 uppercase">Imagen del producto</label>
+          <div class="flex items-center gap-2 mt-0.5">
+            <input type="file" id="pf-image-file" accept="image/*" onchange="readProductImage(event)"
+              class="text-[11px] text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-niko-red file:text-white file:text-[11px] file:font-bold file:cursor-pointer">
+            <button type="button" onclick="clearProductImage()"
+              class="text-[10px] font-bold text-slate-400 hover:text-niko-red">Quitar</button>
+          </div>
+          <input type="url" id="pf-image" placeholder="o pega una URL https://..." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg mt-1.5">
+          <img id="pf-image-preview" alt="Vista previa"
+            class="hidden mt-1.5 w-16 h-16 object-cover rounded-lg border border-slate-200">
+          <p class="text-[10px] text-slate-400 mt-0.5">La imagen queda guardada en el producto y el catálogo PDF la incluye automáticamente.</p>
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div>
@@ -543,15 +557,29 @@
           <label class="text-[11px] font-bold text-slate-500 uppercase">Características <span class="normal-case">(separadas por coma)</span></label>
           <input type="text" id="pf-features" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg mt-0.5">
         </div>
-        <div>
-          <label class="text-[11px] font-bold text-slate-500 uppercase">URL de imagen</label>
-          <input type="url" id="pf-image" placeholder="https://..." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg mt-0.5">
-        </div>
         <p id="pf-error" class="hidden text-red-600 text-[11px] font-bold">Completa al menos el nombre del producto.</p>
       </div>
       <div class="p-3 bg-slate-50 border-t grid grid-cols-2 gap-2">
         <button onclick="closeAddProductModal()" class="py-2.5 rounded-xl text-xs font-bold text-slate-600 border border-slate-300">Cancelar</button>
         <button onclick="saveProductForm()" class="py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700">Guardar producto</button>
+      </div>
+    </div>
+  </div>
+  <!-- VISTA AMPLIADA DE IMAGEN (PANEL) -->
+  <div id="modal-imgview" class="fixed inset-0 z-[55] bg-black/85 flex justify-center items-center p-4 hidden opacity-0 transition-opacity" role="dialog" aria-modal="true" aria-label="Imagen ampliada" aria-hidden="true">
+    <div class="bg-white w-full max-w-md rounded-2xl overflow-hidden shadow-2xl">
+      <div class="bg-niko-dark text-white px-4 py-3 flex justify-between items-center">
+        <h3 class="font-black text-sm"><i class="fa-solid fa-image text-niko-red"></i> Imagen del producto</h3>
+        <button onclick="closeImgView()" class="text-slate-400 hover:text-white" aria-label="Cerrar">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div class="p-3">
+        <img id="imgview-src" src="" alt="Imagen del producto" class="w-full max-h-[55vh] object-contain bg-slate-100 rounded-xl border border-slate-200">
+      </div>
+      <div class="p-3 bg-slate-50 border-t grid grid-cols-2 gap-2">
+        <button onclick="editFromImgView()" class="py-2.5 rounded-xl text-xs font-bold text-white bg-niko-red hover:bg-red-700">Cambiar imagen</button>
+        <button onclick="closeImgView()" class="py-2.5 rounded-xl text-xs font-bold text-slate-600 border border-slate-300">Cerrar</button>
       </div>
     </div>
   </div>
@@ -561,13 +589,14 @@
   <script>
     // ========== CONFIG ==========
     const WHATSAPP_NUMBER = "573208226272"; // Número real de Distribuciones Niko (código país 57 + 3208226272)
-    const ADMIN_PIN = "1234"; // CAMBIA este PIN antes de publicar el catálogo
+    const ADMIN_PIN = "Distribuciones_Niko_9832"; // CÓDIGO DE ACCESO al panel. Cámbialo antes de publicar.
     const INSTAGRAM_URL = "https://www.instagram.com/distribucionesniko"; // Reemplaza por tu perfil real
     const TIKTOK_URL = "https://www.tiktok.com/@distribucionesniko"; // Reemplaza por tu perfil real
     const FACEBOOK_URL = "https://www.facebook.com/distribucionesniko"; // Reemplaza por tu perfil real
     // ========== SUPABASE ==========
     // Cambios del admin suben a Supabase y se ven en todos los dispositivos.
-    // IMPORTANTE: activa las RLS policies (SQL que te di) para permitir leer/escribir.
+    // Para que eso funcione, deja RLS desactivada o permite escritura anónima
+    // (no uses el SQL de políticas de solo-lectura, rompería el panel).
     const SUPABASE_URL = "https://oopoulppawnvqozrykbj.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_aHnLvSOtNu_A-CZN2qrA6w_YwUkcGZD";
     // ========== DATA ==========
@@ -679,6 +708,7 @@
         if (storedCartE) {
           try { cart = JSON.parse(storedCartE); } catch { cart = []; }
         }
+        regenerateCatalogPdf();
         return;
       }
       const stored = localStorage.getItem("niko_products");
@@ -693,13 +723,21 @@
       if (storedCart) {
         try { cart = JSON.parse(storedCart); } catch { cart = []; }
       }
+      regenerateCatalogPdf();
     }
     function saveProducts() {
       localStorage.setItem("niko_products", JSON.stringify(products));
-      if (supabaseClient && SUPABASE_TABLE) {
-        supabaseClient.from(SUPABASE_TABLE).upsert(products.map(toDb), { onConflict: "ref" })
-          .then(res => { if (res.error) console.error("Supabase upsert:", res.error.message); });
-      }
+      regenerateCatalogPdf(); // el sistema regenera el catálogo automáticamente con el inventario actual
+    }
+    function syncRow(p) {
+      if (!supabaseClient || !SUPABASE_TABLE) return;
+      supabaseClient.from(SUPABASE_TABLE).upsert([toDb(p)], { onConflict: "ref" })
+        .then(res => { if (res.error) console.error("Supabase upsert fila:", res.error.message); });
+    }
+    function syncAll() {
+      if (!supabaseClient || !SUPABASE_TABLE) return;
+      supabaseClient.from(SUPABASE_TABLE).upsert(products.map(toDb), { onConflict: "ref" })
+        .then(res => { if (res.error) console.error("Supabase upsert masivo:", res.error.message); });
     }
     function mapFromDb(r) {
       return {
@@ -1153,15 +1191,26 @@
     function closePdfModal() {
       setModal("modal-pdf", false);
     }
-    function generatePDF(share = false) {
+    function buildCatalogPdf(auto) {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
-      const useMayorista = document.getElementById("pdf-mayorista").checked;
-      const useDetal = document.getElementById("pdf-detal").checked;
-      const noPrice = document.getElementById("pdf-noprice").checked;
-      const includeSpecs = document.getElementById("pdf-specs").checked;
-      const includeOut = document.getElementById("pdf-outstock").checked;
-      const onlySelected = document.getElementById("pdf-selected").checked;
+      let useMayorista, useDetal, noPrice, includeSpecs, includeOut, onlySelected;
+      if (auto) {
+        // Generación automática: inventario completo, precios mayoristas y fichas, sin agotados
+        useMayorista = true;
+        useDetal = false;
+        noPrice = false;
+        includeSpecs = true;
+        includeOut = false;
+        onlySelected = false;
+      } else {
+        useMayorista = document.getElementById("pdf-mayorista").checked;
+        useDetal = document.getElementById("pdf-detal").checked;
+        noPrice = document.getElementById("pdf-noprice").checked;
+        includeSpecs = document.getElementById("pdf-specs").checked;
+        includeOut = document.getElementById("pdf-outstock").checked;
+        onlySelected = document.getElementById("pdf-selected").checked;
+      }
       // Header
       doc.setFillColor(227, 6, 19);
       doc.rect(0, 0, 210, 28, "F");
@@ -1172,11 +1221,13 @@
       doc.setFontSize(9);
       doc.text("VENDE LO QUE SE VENDE  |  Catálogo actualizado", 14, 22);
       let list = [];
-      // Solo productos del carrito
-      if (onlySelected) {
+      if (auto) {
+        // Todo el inventario disponible (lo que hay con stock)
+        list = products.filter(p => p.active !== false && p.stock > 0);
+      } else if (onlySelected) {
         if (cart.length === 0) {
           showToast("El carrito está vacío. Agrega productos primero.");
-          return;
+          return null;
         }
         list = cart.map(item => {
           const p = products.find(x => x.id === item.id);
@@ -1190,46 +1241,212 @@
           list = list.filter(p => p.category === currentCategory);
         }
       }
-      const head = ["Ref", "Producto", "Categoría"];
-      if (onlySelected) head.push("Cantidad");
-      if (useMayorista && !noPrice) head.push("Mayorista");
-      if (useDetal && !noPrice) head.push("Detal");
-      if (includeSpecs) head.push("Características");
-      const body = list.map(p => {
-        const row = [p.ref, p.name, p.category];
-        if (onlySelected) row.push(p.qty || 1);
-        if (useMayorista && !noPrice) row.push("$" + p.priceMayorista.toLocaleString("es-CO"));
-        if (useDetal && !noPrice) row.push("$" + p.priceDetal.toLocaleString("es-CO"));
-        if (includeSpecs) row.push((p.features || "").substring(0, 40));
-        return row;
+      return new Promise(resolve => {
+        // Carga las imágenes de los productos para incrustarlas en el PDF
+        const imgMap = new Map();
+        Promise.all(list.map(async p => {
+          if (!p.image) return;
+          const data = await prepareImageForPdf(p.image);
+          if (data) imgMap.set(p.ref, data);
+        })).then(() => {
+          const hasImages = imgMap.size > 0;
+          const head = [];
+          if (hasImages) head.push("Imagen");
+          head.push("Ref", "Producto", "Categoría");
+          if (onlySelected) head.push("Cantidad");
+          if (useMayorista && !noPrice) head.push("Mayorista");
+          if (useDetal && !noPrice) head.push("Detal");
+          if (includeSpecs) head.push("Características");
+          const imgCol = hasImages ? 0 : -1;
+          const body = list.map(p => {
+            const row = [];
+            if (hasImages) row.push("");
+            row.push(p.ref, p.name, p.category);
+            if (onlySelected) row.push(p.qty || 1);
+            if (useMayorista && !noPrice) row.push("$" + p.priceMayorista.toLocaleString("es-CO"));
+            if (useDetal && !noPrice) row.push("$" + p.priceDetal.toLocaleString("es-CO"));
+            if (includeSpecs) row.push((p.features || "").substring(0, 40));
+            return row;
+          });
+          doc.autoTable({
+            startY: 35,
+            head: [head],
+            body: body,
+            headStyles: { fillColor: [15, 15, 15], textColor: 255, fontSize: 9 },
+            bodyStyles: { fontSize: 8 },
+            alternateRowStyles: { fillColor: [248, 250, 252] },
+            margin: { left: 10, right: 10 },
+            columnStyles: imgCol >= 0 ? { [imgCol]: { cellWidth: 30, minCellHeight: 34 } } : {},
+            didParseCell: (data) => {
+              if (imgCol >= 0 && data.section === "body" && data.column.index === imgCol) {
+                try { data.row.height = Math.max(data.row.height || 0, 34); } catch (e) { }
+              }
+            },
+            didDrawCell: (data) => {
+              if (imgCol < 0 || data.section !== "body" || data.column.index !== imgCol) return;
+              try {
+                const ref = data.row.raw[1];
+                const meta = imgMap.get(ref);
+                if (!meta || data.cell.x == null) return;
+                const pad = 1.5;
+                const boxW = Math.max(2, data.cell.width - 2 * pad);
+                const boxH = Math.max(2, data.cell.height - 2 * pad);
+                const ar = (meta.w && meta.h) ? meta.w / meta.h : boxW / boxH;
+                let iw, ih;
+                if (boxW / boxH > ar) {
+                  ih = boxH;
+                  iw = boxH * ar;
+                } else {
+                  iw = boxW;
+                  ih = boxW / ar;
+                }
+                const ix = data.cell.x + pad + (boxW - iw) / 2;
+                const iy = data.cell.y + pad + (boxH - ih) / 2;
+                doc.addImage(meta.data, "JPEG", ix, iy, iw, ih);
+              } catch (e) { }
+            }
+          });
+          // Footer
+          const pageCount = doc.internal.getNumberOfPages();
+          for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(150);
+            doc.text(`Página ${i} de ${pageCount}  |  www.distribucionesniko.com`, 105, 290, { align: "center" });
+          }
+          const suffix = auto ? "Inventario" : (onlySelected ? "Seleccionados" : (currentCategory || "Completo"));
+          const fileName = `Catalogo_Niko_${suffix}_${new Date().toISOString().slice(0,10)}.pdf`;
+          resolve({ doc, fileName, count: list.length, onlySelected });
+        });
       });
-      doc.autoTable({
-        startY: 35,
-        head: [head],
-        body: body,
-        headStyles: { fillColor: [15, 15, 15], textColor: 255, fontSize: 9 },
-        bodyStyles: { fontSize: 8 },
-        alternateRowStyles: { fillColor: [248, 250, 252] },
-        margin: { left: 10, right: 10 }
+    }
+    // Carga una imagen (URL o dataURL) y la prepara en alta nitidez para incrustar en el PDF
+    const pdfImgCache = new Map();
+    function prepareImageForPdf(url) {
+      if (!url) return Promise.resolve(null);
+      if (pdfImgCache.has(url)) return Promise.resolve(pdfImgCache.get(url));
+      return new Promise(resolve => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        const to = setTimeout(() => { img.src = ""; resolve(null); }, 10000);
+        img.onload = () => {
+          clearTimeout(to);
+          try {
+            const maxS = 600; // alta resolución para que se vean nítidas en el PDF
+            const nw = img.naturalWidth || 1;
+            const nh = img.naturalHeight || 1;
+            const scale = Math.min(1, maxS / Math.max(nw, nh));
+            const w = Math.max(1, Math.round(nw * scale));
+            const h = Math.max(1, Math.round(nh * scale));
+            const c = document.createElement("canvas");
+            c.width = w;
+            c.height = h;
+            c.getContext("2d").drawImage(img, 0, 0, w, h);
+            const data = c.toDataURL("image/jpeg", 0.9);
+            pdfImgCache.set(url, { data, w, h });
+            resolve({ data, w, h });
+          } catch (e) {
+            resolve(null);
+          }
+        };
+        img.onerror = () => { clearTimeout(to); resolve(null); };
+        img.src = url;
       });
-      // Footer
-      const pageCount = doc.internal.getNumberOfPages();
-      for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(8);
-        doc.setTextColor(150);
-        doc.text(`Página ${i} de ${pageCount}  |  www.distribucionesniko.com`, 105, 290, { align: "center" });
+    }
+    async function generatePDF(share = false, auto = false) {
+      const res = await buildCatalogPdf(auto);
+      if (!res) return;
+      if (!res.count) {
+        showToast("No hay productos en inventario para generar el PDF.");
+        return;
       }
-      const suffix = onlySelected ? "Seleccionados" : (currentCategory || "Completo");
-      const fileName = `Catalogo_Niko_${suffix}_${new Date().toISOString().slice(0,10)}.pdf`;
-      doc.save(fileName);
+      res.doc.save(res.fileName);
       closePdfModal();
-      showToast(onlySelected ? "PDF de productos seleccionados generado" : "PDF generado correctamente");
+      showToast(auto ? "Catálogo del inventario generado por el sistema" : (res.onlySelected ? "PDF de productos seleccionados generado" : "PDF generado correctamente"));
       if (share) {
         setTimeout(() => {
           window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("¡Hola! Te comparto el catálogo actualizado de Distribuciones Niko 📎")}`, "_blank");
         }, 800);
       }
+    }
+    // ========== GENERACIÓN AUTOMÁTICA DEL PDF ==========
+    // El sistema regenera el catálogo en segundo plano cada vez que cambia el inventario.
+    const autoPdfState = { url: null, name: "" };
+    async function regenerateCatalogPdf() {
+      if (typeof window.jspdf === "undefined") return;
+      try {
+        const res = await buildCatalogPdf(true);
+        if (!res || !res.count) return;
+        if (autoPdfState.url) URL.revokeObjectURL(autoPdfState.url);
+        autoPdfState.url = res.doc.output("bloburl");
+        autoPdfState.name = res.fileName;
+      } catch (e) {
+        console.error("Auto PDF:", e.message);
+      }
+    }
+    function downloadAutoCatalogPdf() {
+      if (!autoPdfState.url) {
+        // Aún no generado en segundo plano: se genera al instante
+        generatePDF(false, true);
+        return;
+      }
+      const a = document.createElement("a");
+      a.href = autoPdfState.url;
+      a.download = autoPdfState.name || `Catalogo_Niko_Inventario_${new Date().toISOString().slice(0,10)}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showToast("Catálogo generado por el sistema");
+    }
+    // ========== IMAGEN DEL PRODUCTO (PANEL) ==========
+    let imgViewProductId = null;
+    function openImgView(id) {
+      imgViewProductId = id;
+      const p = products.find(x => x.id === id);
+      if (!p) return;
+      const img = document.getElementById("imgview-src");
+      img.src = "";
+      img.onerror = () => imgFallback(img);
+      if (p.image) {
+        img.src = p.image;
+      } else {
+        imgFallback(img);
+      }
+      setModal("modal-imgview", true);
+    }
+    function closeImgView() {
+      setModal("modal-imgview", false);
+    }
+    function editFromImgView() {
+      const id = imgViewProductId;
+      closeImgView();
+      if (id) editProduct(id);
+    }
+    function refreshProductImagePreview() {
+      const src = document.getElementById("pf-image").value.trim();
+      const prev = document.getElementById("pf-image-preview");
+      if (src) {
+        prev.src = src;
+        prev.classList.remove("hidden");
+      } else {
+        prev.src = "";
+        prev.classList.add("hidden");
+      }
+    }
+    function readProductImage(e) {
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = () => {
+        document.getElementById("pf-image").value = r.result;
+        refreshProductImagePreview();
+      };
+      r.readAsDataURL(f);
+    }
+    function clearProductImage() {
+      document.getElementById("pf-image").value = "";
+      document.getElementById("pf-image-file").value = "";
+      refreshProductImagePreview();
     }
     // ========== EXCEL IMPORT / EXPORT ==========
     function importExcel(e) {
@@ -1274,6 +1491,7 @@
             }
           });
           saveProducts();
+          syncAll();
           renderAdmin();
           renderHomeCats();
           applyFilters();
@@ -1315,6 +1533,13 @@
       tbody.innerHTML = products.map(p => `
         <tr class="hover:bg-slate-50">
           <td class="p-2 font-bold text-left max-w-[120px] truncate">${esc(p.name)}</td>
+          <td class="p-2">
+            <button onclick="openImgView('${esc(p.id)}')" class="block w-16 h-16 rounded-lg overflow-hidden border border-slate-200 bg-slate-50 hover:ring-2 hover:ring-niko-red" title="Ver imagen" aria-label="Ver imagen de ${esc(p.name)}">
+              ${p.image
+                ? `<img src="${esc(p.image)}" onerror="imgFallback(this)" alt="${esc(p.name)}" class="w-full h-full object-contain p-0.5">`
+                : `<span class="w-full h-full flex items-center justify-center text-slate-300"><i class="fa-solid fa-camera text-xl"></i></span>`}
+            </button>
+          </td>
           <td class="p-2 font-mono text-slate-500">${esc(p.ref)}</td>
           <td class="p-2 font-bold text-niko-red">$${p.priceMayorista.toLocaleString("es-CO")}</td>
           <td class="p-2">
@@ -1357,6 +1582,8 @@
       document.getElementById("pf-features").value = "";
       document.getElementById("pf-brand").value = "NIKO";
       document.getElementById("pf-image").value = "";
+      document.getElementById("pf-image-file").value = "";
+      refreshProductImagePreview();
       setModal("modal-add-product", true);
     }
     function editProduct(id) {
@@ -1378,6 +1605,8 @@
       document.getElementById("pf-features").value = p.features || "";
       document.getElementById("pf-brand").value = p.brand || "NIKO";
       document.getElementById("pf-image").value = p.image || "";
+      document.getElementById("pf-image-file").value = "";
+      refreshProductImagePreview();
       setModal("modal-add-product", true);
     }
     function closeAddProductModal() {
@@ -1418,6 +1647,7 @@
         }
         Object.assign(editing, data);
         saveProducts();
+        syncRow(editing);
         renderAdmin();
         renderHomeCats();
         applyFilters();
@@ -1432,6 +1662,7 @@
       }
       products.unshift(Object.assign({ id: `new-${Date.now()}` }, data));
       saveProducts();
+      syncRow(products[0]);
       renderAdmin();
       renderHomeCats();
       applyFilters();
