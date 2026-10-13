@@ -54,12 +54,6 @@
               <i class="fa-brands fa-whatsapp"></i> WhatsApp
             </button>
           </div>
-          <button onclick="openWholesaleModal()" id="btn-wholesale" class="bg-white text-slate-700 p-1.5 md:p-2 rounded-full shadow-sm hover:bg-slate-100" aria-label="Acceso mayorista" title="Acceso mayorista">
-            <i class="fa-solid fa-store text-sm md:text-base"></i>
-          </button>
-          <button onclick="openTrackModal()" class="bg-white text-slate-700 p-1.5 md:p-2 rounded-full shadow-sm hover:bg-slate-100" aria-label="Seguir pedido" title="Seguir mi pedido">
-            <i class="fa-solid fa-magnifying-glass-location text-sm md:text-base"></i>
-          </button>
           <button onclick="openPdfModal()" id="btn-pdf" class="hidden bg-white text-niko-red p-1.5 md:p-2 rounded-full shadow-sm hover:bg-slate-100" aria-label="Generar catálogo PDF">
             <i class="fa-solid fa-file-pdf text-sm md:text-base"></i>
           </button>
@@ -204,22 +198,6 @@
             <option value="price-desc">Precio ↓</option>
             <option value="name">Nombre</option>
           </select>
-        </div>
-        <!-- Filtros avanzados: precio + disponibilidad -->
-        <div class="flex gap-2 items-center">
-          <div class="flex items-center gap-1 bg-slate-100 border border-slate-200 rounded-lg px-2 py-1.5">
-            <span class="text-[11px] text-slate-500">$</span>
-            <input type="number" id="filter-min" oninput="applyFilters()" placeholder="mín" class="w-14 bg-transparent text-xs focus:outline-none" inputmode="numeric">
-            <span class="text-[11px] text-slate-400">–</span>
-            <input type="number" id="filter-max" oninput="applyFilters()" placeholder="máx" class="w-14 bg-transparent text-xs focus:outline-none" inputmode="numeric">
-          </div>
-          <select id="filter-stock" onchange="applyFilters()" class="bg-slate-100 border border-slate-200 text-xs rounded-lg px-2 py-1.5">
-            <option value="all">Disponibilidad</option>
-            <option value="in">En stock</option>
-            <option value="low">Bajo stock</option>
-            <option value="out">Agotados</option>
-          </select>
-          <button onclick="clearFilters()" class="text-[11px] font-bold text-niko-red px-2 py-1.5">Limpiar</button>
         </div>
         <div class="text-[11px] text-slate-500 border-b pb-1">
           <span id="prod-count">0 productos</span>
@@ -485,7 +463,7 @@
           <span id="m-total" class="text-base font-black text-niko-red">$0</span>
         </div>
         <button id="m-add-btn" class="w-full bg-niko-red hover:bg-red-700 text-white font-black py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg text-sm">
-          <i class="fa-solid fa-cart-plus"></i> Agregar al pedido
+          <i class="fa-solid fa-cart-plus"></i> Agregar al carrito
         </button>
       </div>
     </div>
@@ -514,62 +492,6 @@
           <span class="block text-[11px] text-slate-500">Cantidades de docena o más · menor precio</span>
         </span>
       </button>
-    </div>
-  </div>
-  <!-- ================= ACCESO MAYORISTA ================= -->
-  <div id="modal-mayorista" class="fixed inset-0 z-[70] bg-black/85 flex justify-center items-center p-6 hidden opacity-0 transition-opacity" role="dialog" aria-modal="true" aria-label="Acceso mayorista" aria-hidden="true">
-    <div class="bg-white w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl relative">
-      <button onclick="closeWholesaleModal()" class="absolute top-3 right-3 text-slate-400 hover:text-slate-700" aria-label="Cerrar">
-        <i class="fa-solid fa-xmark text-lg"></i>
-      </button>
-      <div class="flex items-center gap-3 border-b pb-3">
-        <div class="bg-slate-900 text-niko-red p-2.5 rounded-xl">
-          <i class="fa-solid fa-store text-lg"></i>
-        </div>
-        <div>
-          <h3 class="font-black text-sm">Acceso mayorista</h3>
-          <p class="text-[11px] text-slate-500">Ingresa tu código de distribuidor</p>
-        </div>
-      </div>
-      <div>
-        <input type="password" id="wholesale-pin" autocomplete="off" maxlength="40" placeholder="Código de mayorista"
-          oninput="document.getElementById('wholesale-error').classList.add('hidden')"
-          onkeydown="if(event.key==='Enter') attemptWholesaleLogin()"
-          class="w-full text-center text-sm tracking-[0.2em] p-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-niko-red">
-        <p id="wholesale-error" class="hidden mt-1.5 text-red-600 text-[11px] font-bold">Código incorrecto. Inténtalo de nuevo.</p>
-        <p id="wholesale-info" class="hidden mt-1.5 text-emerald-700 text-[11px] font-bold"></p>
-      </div>
-      <div class="grid grid-cols-2 gap-2">
-        <button onclick="logoutWholesale()" id="wholesale-logout" class="hidden py-2.5 rounded-xl text-xs font-bold text-slate-600 border border-slate-300">Salir de mayorista</button>
-        <button onclick="attemptWholesaleLogin()" class="col-span-2 py-2.5 rounded-xl text-xs font-black text-white bg-niko-red hover:bg-red-700">
-          <i class="fa-solid fa-unlock"></i> Activar precios mayoristas
-        </button>
-      </div>
-      <p class="text-[10px] text-slate-400 text-center">Al activarlo se muestran los precios al por mayor y aplica una compra mínima de 12 unidades por pedido.</p>
-    </div>
-  </div>
-  <!-- ================= SEGUIMIENTO DE PEDIDO ================= -->
-  <div id="modal-track" class="fixed inset-0 z-[70] bg-black/85 flex justify-center items-center p-6 hidden opacity-0 transition-opacity" role="dialog" aria-modal="true" aria-label="Seguimiento de pedido" aria-hidden="true">
-    <div class="bg-white w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl relative">
-      <button onclick="closeTrackModal()" class="absolute top-3 right-3 text-slate-400 hover:text-slate-700" aria-label="Cerrar">
-        <i class="fa-solid fa-xmark text-lg"></i>
-      </button>
-      <div class="flex items-center gap-3 border-b pb-3">
-        <div class="bg-slate-900 text-niko-red p-2.5 rounded-xl">
-          <i class="fa-solid fa-magnifying-glass-location text-lg"></i>
-        </div>
-        <div>
-          <h3 class="font-black text-sm">Seguir mi pedido</h3>
-          <p class="text-[11px] text-slate-500">Escribe tu código de pedido (PED-...)</p>
-        </div>
-      </div>
-      <div class="flex gap-2">
-        <input type="text" id="track-code" placeholder="PED-20260101-1234-ABCD"
-          onkeydown="if(event.key==='Enter') trackOrder()"
-          class="flex-1 text-xs p-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-niko-red">
-        <button onclick="trackOrder()" class="px-3 rounded-lg bg-niko-red text-white font-bold text-xs"><i class="fa-solid fa-magnifying-glass"></i></button>
-      </div>
-      <div id="track-result" class="text-xs"></div>
     </div>
   </div>
   <!-- ================= CONFIRMAR PEDIDO (antes de WhatsApp) ================= -->
@@ -1163,10 +1085,6 @@
     // está en Supabase (RLS + Auth). Nunca escribas el PIN en este archivo.
     // Para cambiarlo: calcula el SHA-256 del nuevo código y reemplaza ADMIN_PIN_HASH.
     const ADMIN_PIN_HASH = "eb1b818a51514651b8b9a0473ad0e5d8a0243aac297f0812bf8bad118edc1235";
-    // Código de acceso para clientes MAYORISTAS (igualmente solo se guarda su SHA-256).
-    // Al ingresarlo: se muestran precios mayoristas y se exige compra mínima por volumen.
-    const WHOLESALE_PIN_HASH = "94f61fde446496083d10eb6229a8768277f3c4724cec9b1088afcad81617fb9e";
-    const WHOLESALE_MIN_UNITS = 12; // mínimo de unidades por pedido para clientes mayoristas
     const MAX_RECEIPT_BYTES = 400 * 1024; // límite del comprobante (ya comprimido a WebP)
     const RECEIPT_BUCKET = "comprobantes"; // bucket de Supabase Storage para los comprobantes (ver SQL)
     const INSTAGRAM_URL = "https://www.instagram.com/distribucionesniko"; // Reemplaza por tu perfil real
@@ -1318,7 +1236,6 @@
     let currentSubcat = "Todas";
     let posCart = [];
     let posPriceMode = "mayorista";
-    let wholesaleClient = localStorage.getItem("niko_wholesale") === "1";
     let cartReceipt = ""; // comprobante de pago (dataURL WebP) del pedido actual
     let pendingOrder = null; // pedido listo para confirmar antes de abrir WhatsApp
     let supabaseClient = null;
@@ -1338,7 +1255,6 @@
       if (cloudEnabled) { pullOrdersFromCloud(); pullClientsFromCloud(); pullCajaFromCloud(); } // el panel admin lee pedidos, clientes y caja de la nube
       renderHomeCats();
       updateCartBadge();
-      updateWholesaleUI();
       // Selección de precio OBLIGATORIA en cada ingreso: aunque exista un modo
       // guardado, se vuelve a preguntar Mayorista o Detal. El cliente nunca
       // puede elegir "sin precios" (eso es exclusivo del administrador).
@@ -2923,36 +2839,20 @@ ${Object.keys(t.byMethod).filter(k => k !== "efectivo" && t.byMethod[k] !== 0).l
       const q = norm(document.getElementById("prod-search").value);
       const sort = document.getElementById("sort-select").value;
       const priceField = priceMode === "detal" ? "priceDetal" : "priceMayorista";
-      const minEl = document.getElementById("filter-min");
-      const maxEl = document.getElementById("filter-max");
-      const stockSel = document.getElementById("filter-stock");
-      const min = minEl && minEl.value !== "" ? parseFloat(minEl.value) : null;
-      const max = maxEl && maxEl.value !== "" ? parseFloat(maxEl.value) : null;
-      const stockFilter = stockSel ? stockSel.value : "all";
       let list = products.filter(p => {
         if (p.active === false) return false;
         if (p.category !== currentCategory) return false;
         if (currentSubcat && currentSubcat !== "Todas" && p.subcategory !== currentSubcat) return false;
         if (q && norm(p.name).indexOf(q) < 0 &&
             norm(p.ref).indexOf(q) < 0 &&
+            norm(p.category).indexOf(q) < 0 &&
             norm(p.subcategory).indexOf(q) < 0) return false;
-        if (min != null && !isNaN(min) && (p[priceField] || 0) < min) return false;
-        if (max != null && !isNaN(max) && (p[priceField] || 0) > max) return false;
-        if (stockFilter === "in" && !(p.stock > 0)) return false;
-        if (stockFilter === "low" && !(p.stock > 0 && p.minStock != null && p.stock <= p.minStock)) return false;
-        if (stockFilter === "out" && p.stock > 0) return false;
         return true;
       });
       if (sort === "price-asc") list.sort((a,b) => a[priceField] - b[priceField]);
       if (sort === "price-desc") list.sort((a,b) => b[priceField] - a[priceField]);
       if (sort === "name") list.sort((a,b) => a.name.localeCompare(b.name));
       renderProducts(list);
-    }
-    function clearFilters() {
-      ["filter-min", "filter-max"].forEach(id => { const e = document.getElementById(id); if (e) e.value = ""; });
-      const s = document.getElementById("filter-stock"); if (s) s.value = "all";
-      const q = document.getElementById("prod-search"); if (q) q.value = "";
-      applyFilters();
     }
     function buildProductCard(p) {
       let priceHtml = "";
@@ -2997,7 +2897,7 @@ ${Object.keys(t.byMethod).filter(k => k !== "efectivo" && t.byMethod[k] !== 0).l
                        <span class="text-xs font-black text-niko-red">${inCartQty} und</span>
                        <button onclick="event.stopPropagation(); cardStep('${esc(p.id)}',1)" class="w-7 h-7 rounded-md bg-white border border-slate-300 text-niko-red font-black text-sm active:scale-95 transition" aria-label="Agregar una unidad">+</button>
                      </div>`
-                  : `<button onclick="event.stopPropagation(); cardStep('${esc(p.id)}',1)" class="w-full mt-1.5 bg-niko-red hover:bg-red-700 text-white font-bold py-1.5 rounded-lg text-xs"><i class="fa-solid fa-cart-plus"></i> Agregar</button>`)}
+                  : `<button onclick="event.stopPropagation(); cardStep('${esc(p.id)}',1)" class="w-full mt-1.5 bg-niko-red hover:bg-red-700 text-white font-bold py-1.5 rounded-lg text-[11px] flex items-center justify-center gap-1.5 shadow"><i class="fa-solid fa-cart-plus"></i> Agregar al carrito</button>`)}
               <button onclick="openProduct('${esc(p.id)}')" class="w-full mt-1 text-[11px] font-bold text-slate-500 hover:text-niko-red py-1">Ver producto</button>
             </div>
           </div>
@@ -3069,7 +2969,7 @@ ${Object.keys(t.byMethod).filter(k => k !== "efectivo" && t.byMethod[k] !== 0).l
       } else {
         mAddBtn.disabled = false;
         mAddBtn.className = "w-full bg-niko-red hover:bg-red-700 text-white font-black py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg text-sm";
-        mAddBtn.innerHTML = `<i class="fa-solid fa-cart-plus"></i> Agregar al pedido`;
+        mAddBtn.innerHTML = `<i class="fa-solid fa-cart-plus"></i> Agregar al carrito`;
         mAddBtn.onclick = () => {
           addToCart(p.id, modalQty);
           closeProductModal();
@@ -3216,52 +3116,6 @@ ${Object.keys(t.byMethod).filter(k => k !== "efectivo" && t.byMethod[k] !== 0).l
       document.getElementById("cart-overlay").classList.add("pointer-events-none", "opacity-0");
       document.getElementById("cart-drawer").classList.add("translate-x-full");
     }
-    // ========== ACCESO MAYORISTA (clientes de volumen) ==========
-    function openWholesaleModal() {
-      const err = document.getElementById("wholesale-error"); if (err) err.classList.add("hidden");
-      const info = document.getElementById("wholesale-info");
-      const out = document.getElementById("wholesale-logout");
-      const inp = document.getElementById("wholesale-pin");
-      if (inp) inp.value = "";
-      if (wholesaleClient) {
-        if (info) { info.textContent = "Ya tienes el acceso mayorista activo."; info.classList.remove("hidden"); }
-        if (out) out.classList.remove("hidden");
-      } else {
-        if (info) info.classList.add("hidden");
-        if (out) out.classList.add("hidden");
-      }
-      setModal("modal-mayorista", true);
-      if (!wholesaleClient) setTimeout(() => inp && inp.focus(), 250);
-    }
-    function closeWholesaleModal() { setModal("modal-mayorista", false); }
-    function attemptWholesaleLogin() {
-      const pin = (document.getElementById("wholesale-pin").value || "");
-      if (sha256Hex(pin) === WHOLESALE_PIN_HASH) {
-        wholesaleClient = true;
-        localStorage.setItem("niko_wholesale", "1");
-        applyPriceMode("mayorista");
-        localStorage.setItem("niko_price_mode", "mayorista");
-        closeWholesaleModal();
-        updateWholesaleUI();
-        showToast("Acceso mayorista activado: precios al por mayor");
-      } else {
-        document.getElementById("wholesale-error").classList.remove("hidden");
-      }
-    }
-    function logoutWholesale() {
-      wholesaleClient = false;
-      localStorage.removeItem("niko_wholesale");
-      closeWholesaleModal();
-      updateWholesaleUI();
-      showToast("Acceso mayorista desactivado");
-    }
-    function updateWholesaleUI() {
-      const btn = document.getElementById("btn-wholesale");
-      if (btn) {
-        btn.className = "p-1.5 md:p-2 rounded-full shadow-sm " + (wholesaleClient ? "bg-amber-500 text-white" : "bg-white text-slate-700 hover:bg-slate-100");
-        btn.title = wholesaleClient ? "Acceso mayorista activo" : "Acceso mayorista";
-      }
-    }
     // ========== COMPROBANTE DE PAGO DEL PEDIDO ==========
     // Sube el comprobante a Supabase Storage (bucket RECEIPT_BUCKET) y devuelve la URL
     // pública corta. Si Storage no está disponible, devuelve el dataURL original
@@ -3301,44 +3155,6 @@ ${Object.keys(t.byMethod).filter(k => k !== "efectivo" && t.byMethod[k] !== 0).l
       if (box) { box.classList.add("hidden"); box.classList.remove("flex"); }
       const img = document.getElementById("cart-receipt-img"); if (img) img.src = "";
     }
-    // ========== SEGUIMIENTO DE PEDIDO ==========
-    function openTrackModal() {
-      const r = document.getElementById("track-result"); if (r) r.innerHTML = "";
-      const c = document.getElementById("track-code"); if (c) c.value = "";
-      setModal("modal-track", true);
-      setTimeout(() => c && c.focus(), 250);
-    }
-    function closeTrackModal() { setModal("modal-track", false); }
-    function trackOrder() {
-      const code = (document.getElementById("track-code").value || "").trim().toUpperCase();
-      const box = document.getElementById("track-result");
-      if (!code) { box.innerHTML = `<p class="text-red-600 font-bold">Escribe un código de pedido.</p>`; return; }
-      const o = ordersLog.find(x => String(x.id).toUpperCase() === code || String(x.id).toUpperCase().indexOf(code) === 0);
-      if (!o) {
-        box.innerHTML = `<div class="bg-slate-50 rounded-xl p-3 text-slate-500">No encontramos el pedido <b>${esc(code)}</b>. Verifica el código (formato PED-AAMMDD-HHMM-XXXX).</div>`;
-        return;
-      }
-      const st = o.status || "pendiente";
-      const color = st === "enviado" ? "bg-sky-100 text-sky-700" : st === "confirmado" ? "bg-emerald-100 text-emerald-700" : st === "pendiente" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-600";
-      const label = st === "enviado" ? "Enviado" : st === "confirmado" ? "Confirmado" : st === "pendiente" ? "Recibido / Pendiente" : "Anulado";
-      box.innerHTML = `
-        <div class="bg-slate-50 rounded-xl p-3 space-y-1.5">
-          <div class="flex justify-between items-center">
-            <b class="text-[11px]">${esc(o.id)}</span></b>
-            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${color}">${label}</span>
-          </div>
-          <p class="text-[11px] text-slate-500">${new Date(o.date).toLocaleString("es-CO")} · ${esc(o.client || "")}</p>
-          <p class="text-[11px] text-slate-600">${(o.items || []).map(i => esc(i.name) + " x" + i.qty).join(", ")}</p>
-          ${o.total ? `<p class="text-[11px] font-black text-niko-red">Total: $${o.total.toLocaleString("es-CO")}</p>` : ""}
-          <div class="flex items-center gap-1 text-[10px] text-slate-400 pt-1">
-            <span class="${st !== "pendiente" ? "text-emerald-600" : ""}"><i class="fa-solid fa-circle-check"></i> Recibido</span>
-            <span class="flex-1 h-px bg-slate-300"></span>
-            <span class="${st === "confirmado" || st === "enviado" ? "text-emerald-600" : ""}">Confirmado</span>
-            <span class="flex-1 h-px bg-slate-300"></span>
-            <span class="${st === "enviado" ? "text-sky-600" : ""}">Enviado</span>
-          </div>
-        </div>`;
-    }
     function renderCart() {
       const container = document.getElementById("cart-items");
       if (cart.length === 0) {
@@ -3367,16 +3183,6 @@ ${Object.keys(t.byMethod).filter(k => k !== "efectivo" && t.byMethod[k] !== 0).l
         `;
       }).join("");
       document.getElementById("cart-total").innerText = priceMode === "sin_precios" ? "Por cotizar" : `$${total.toLocaleString("es-CO")}`;
-      const warn = document.getElementById("cart-warn");
-      if (warn) {
-        if (wholesaleClient) {
-          const units = cart.reduce((s, i) => s + i.qty, 0);
-          if (units < WHOLESALE_MIN_UNITS) {
-            warn.textContent = `Compra mínima mayorista: ${WHOLESALE_MIN_UNITS} unidades (llevas ${units}).`;
-            warn.classList.remove("hidden");
-          } else { warn.classList.add("hidden"); }
-        } else { warn.classList.add("hidden"); }
-      }
     }
     function changeQty(id, delta) {
       const item = cart.find(i => i.id === id);
@@ -3425,23 +3231,15 @@ ${Object.keys(t.byMethod).filter(k => k !== "efectivo" && t.byMethod[k] !== 0).l
         if (warn) { warn.textContent = "Revisa el teléfono: debe tener entre 7 y 12 dígitos (ej: 3001234567)."; warn.classList.remove("hidden"); }
         return showToast("Teléfono no válido", "warn");
       }
-      const totalUnits = cart.reduce((s, i) => s + i.qty, 0);
-      if (wholesaleClient && totalUnits < WHOLESALE_MIN_UNITS) {
-        const warn = document.getElementById("cart-warn");
-        if (warn) { warn.textContent = `Compra mínima mayorista: ${WHOLESALE_MIN_UNITS} unidades (llevas ${totalUnits}).`; warn.classList.remove("hidden"); }
-        return showToast(`Mínimo mayorista: ${WHOLESALE_MIN_UNITS} unidades`, "warn");
-      }
       // 1. WhatsApp message
       const now = new Date();
       const rand = "xxxx".replace(/x/g, c => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 32)]);
       const orderNum = `PED-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}-${String(now.getHours()).padStart(2,"0")}${String(now.getMinutes()).padStart(2,"0")}-${rand}`;
       let msg = `🛒 *NUEVO PEDIDO - DISTRIBUCIONES NIKO*\n\n`;
       msg += `👤 *Cliente:* ${name}\n`;
-      if (phone) msg += `📱 ${phone}\n`;
-      if (wholesaleClient) msg += `🏷️ *Cliente mayorista*\n`;
+      if (phone)       msg += `📱 ${phone}\n`;
       msg += `📌 *Modo:* ${priceMode.toUpperCase()}\n`;
-      msg += `🧾 *Pedido:* ${orderNum}\n`;
-      msg += `🔎 *Seguimiento:* envía este código para consultar el estado\n\n`;
+      msg += `🧾 *Pedido:* ${orderNum}\n\n`;
       msg += `*Detalle:*\n`;
       let total = 0;
       cart.forEach((i, idx) => {
@@ -3467,7 +3265,7 @@ ${Object.keys(t.byMethod).filter(k => k !== "efectivo" && t.byMethod[k] !== 0).l
           items: cart.map(i => ({ ref: i.ref, name: i.name, qty: i.qty, price: (priceMode === "detal" ? i.priceDetal : i.priceMayorista) || 0 })),
           total: total,
           status: "pendiente",
-          wholesale: wholesaleClient || false,
+          wholesale: false,
           receipt: cartReceipt || null
         }
       };
